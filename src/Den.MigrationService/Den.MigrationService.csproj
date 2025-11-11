@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Den.MigrationService-3de7b5fb-d8ff-4990-a075-8f696fad1b9e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+
+    <ProjectReference Include="..\Den.Infrastructure\Den.Infrastructure.csproj" />
+    <ProjectReference Include="..\Den.ServiceDefaults\Den.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>
