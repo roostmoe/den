@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Den.Application.Auth;
 using Den.Infrastructure.Persistence;
@@ -45,27 +44,33 @@ public class AuthController(
         };
     }
 
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshRequest request)
+    {
+        var response = await authService.RefreshAsync(request);
+        return response switch
+        {
+            null => Unauthorized(new { error = "invalid refresh token" }),
+            _ => Ok(response),
+        };
+    }
+
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> GetMe()
     {
-        var tokenType = User.FindFirstValue(JwtRegisteredClaimNames.Typ);
-        if (tokenType is null || tokenType != "acc")
-        {
-            logger.LogDebug("Invalid token: {Reason}", new { Reason = "Token type is null or non-acc" });
-            return Unauthorized(new { error = "invalid token" });
-        }
-
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
         {
             logger.LogDebug("Invalid token: {Reason}", new { Reason = "Token has no subject ID" });
             return Unauthorized(new { error = "invalid token" });
         }
 
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == int.Parse(userId));
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId));
 
         if (user is null)
         {

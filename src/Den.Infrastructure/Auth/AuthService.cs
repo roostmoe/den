@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Den.Application.Auth;
 using Den.Domain.Entities;
@@ -28,7 +29,7 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
 
         var user = new User
         {
-            Id = 0,
+            Id = Guid.NewGuid(),
             Username = request.Username,
             DisplayName = request.DisplayName,
             Email = request.Email,
@@ -39,31 +40,39 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        var accessExpires = DateTime.UtcNow.AddHours(1);
-        var accessToken = GenerateJwtToken(user, accessExpires, false);
-        var refreshToken = GenerateJwtToken(user, DateTime.UtcNow.AddDays(7), true);
-
-        return new AuthResponse(
-            AccessToken: accessToken,
-            RefreshToken: refreshToken,
-            ExpiresIn: accessExpires
-        );
+        var (accessToken, refreshToken, session) = await GenerateTokenPair(user);
+        return new AuthResponse(accessToken, refreshToken, session.Expiry);
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
-
         if (user is null || !VerifyPassword(request.Password, user.PasswordHash))
         {
             return null;
         }
 
-        var accessExpires = DateTime.UtcNow.AddHours(3);
-        var accessToken = GenerateJwtToken(user, accessExpires, false);
-        var refreshToken = GenerateJwtToken(user, DateTime.UtcNow.AddDays(7), true);
+        var (accessToken, refreshToken, session) = await GenerateTokenPair(user);
+        return new AuthResponse(accessToken, refreshToken, session.Expiry);
+    }
 
-        return new AuthResponse(accessToken, refreshToken, accessExpires);
+    public async Task<RefreshResponse?> RefreshAsync(RefreshRequest request)
+    {
+        var session = await context.Sessions
+            .Include(s => s.User)
+            .FirstOrDefaultAsync(s => s.RefreshTokenHash == HashRefreshToken(request.RefreshToken));
+        if (session is null)
+        {
+            return null;
+        }
+
+        if (session.Expiry > DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        var accessToken = GenerateAccessToken(session.User);
+        return new RefreshResponse(accessToken);
     }
 
     private static string HashPassword(string password)
@@ -76,31 +85,65 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
         return BCrypt.Net.BCrypt.Verify(password, hash);
     }
 
-    private string GenerateJwtToken(User user, DateTime expiry, bool refresh)
+    private async Task<(string AccessToken, string RefreshToken, Session Session)> GenerateTokenPair(User user)
+    {
+        var tokenExpiry = DateTime.UtcNow.AddDays(7);
+        var refreshToken = GenerateRefreshToken();
+
+        var session = new Session {
+            Id = Guid.NewGuid(),
+            RefreshTokenHash = HashRefreshToken(refreshToken),
+            Expiry = tokenExpiry,
+            UserId = user.Id,
+        };
+        context.Sessions.Add(session);
+        await context.SaveChangesAsync();
+
+        return (GenerateAccessToken(user), refreshToken, session);
+    }
+
+    private string GenerateAccessToken(User user)
     {
         var jwtSecret = config["Jwt:Secret"] ?? throw new InvalidOperationException("jwt secret not configured");
-        var jwtIssuer = config["Jwt:Issuer"] ?? "den";
-        var jwtAudience = config["Jwt:Audience"] ?? "den";
-
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Typ, refresh ? "ref" : "acc")
-        };
+        var now = DateTime.UtcNow;
 
-        var token = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtAudience,
-            claims: claims,
-            expires: expiry,
+        var accessToken = new JwtSecurityToken(
+            issuer: config["jwt:Issuer"] ?? "den",
+            audience: config["jwt:Audience"] ?? "den",
+            claims: [
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            ],
+            expires: now.AddMinutes(5),
             signingCredentials: creds,
-            notBefore: DateTime.UtcNow
+            notBefore: now
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtSecurityTokenHandler().WriteToken(accessToken);
+    }
+
+    private static string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+
+    public static string HashRefreshToken(string token)
+    {
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToBase64String(hashBytes);
+    }
+
+    public static bool VerifyRefreshToken(string a, string b)
+    {
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(a),
+            Encoding.UTF8.GetBytes(b)
+        );
     }
 }

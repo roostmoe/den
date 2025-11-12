@@ -6,4 +6,5 @@ namespace Den.Infrastructure.Persistence;
 public class AuthContext(DbContextOptions<AuthContext> options) : DbContext(options)
 {
   public DbSet<User> Users => Set<User>();
+  public DbSet<Session> Sessions => Set<Session>();
 }
