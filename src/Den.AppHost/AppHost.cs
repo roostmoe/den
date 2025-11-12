@@ -27,6 +27,7 @@ var gateway = builder.AddYarp("gateway")
     .WithHostPort(builder.Configuration.GetValue<int>("Port"))
     .WithConfiguration(yarp =>
     {
+        yarp.AddRoute("/.well-known/jwks.json", auth);
         yarp.AddRoute("/auth/{**catch-all}", auth)
             .WithTransformPathRemovePrefix("/auth");
 
