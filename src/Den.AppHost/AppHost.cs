@@ -4,8 +4,6 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddKubernetesEnvironment("k8s");
-
 var postgres = builder.AddPostgres("postgres")
     .WithDataVolume(isReadOnly: false);
 
