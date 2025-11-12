@@ -66,7 +66,7 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
             return null;
         }
 
-        if (session.Expiry > DateTime.UtcNow)
+        if (session.Expiry <= DateTime.UtcNow)
         {
             return null;
         }
