@@ -5,6 +5,8 @@ using Den.Application.Auth;
 using Den.Infrastructure.Persistence;
 
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 using MSSecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;
@@ -17,6 +19,50 @@ public class SecurityService(
     IDataProtectionProvider dataProtector
 ) : ISecurityService
 {
+    public async Task<List<SecurityKey>> GetActiveKeysAsync(SecurityKey.SecurityKeyUsage? usage, bool create = true)
+    {
+        var query = dbContext.SecurityKeys.AsQueryable();
+
+        if (usage.HasValue)
+            query = query.Where(sk => sk.Usage == usage);
+
+        query = query.Where(sk => sk.IsActive && !sk.IsRevoked && (sk.ExpiresAt == null || sk.ExpiresAt > DateTime.UtcNow));
+
+        var keys = await query.ToListAsync();
+
+        if (
+            !keys.Any(x => x.Usage == SecurityKey.SecurityKeyUsage.Sign)
+            && usage != SecurityKey.SecurityKeyUsage.Encrypt
+            && create
+        )
+        {
+            // We don't have any active keys for this usage type, we need to make one.
+            var signingKey = await GenerateKey(
+                usage ?? SecurityKey.SecurityKeyUsage.Sign,
+                SecurityKey.SecurityKeyType.ECDSA,
+                usage == SecurityKey.SecurityKeyUsage.Sign ? SecurityKey.SecurityKeyHashAlgorithm.SHA512 : null
+            );
+            keys.Add(signingKey);
+        }
+
+        if (
+            !keys.Any(x => x.Usage == SecurityKey.SecurityKeyUsage.Encrypt)
+            && usage != SecurityKey.SecurityKeyUsage.Sign
+            && create
+        )
+        {
+            // We don't have any active keys for this usage type, we need to make one.
+            var signingKey = await GenerateKey(
+                usage ?? SecurityKey.SecurityKeyUsage.Encrypt,
+                SecurityKey.SecurityKeyType.ECDSA,
+                usage == SecurityKey.SecurityKeyUsage.Encrypt ? SecurityKey.SecurityKeyHashAlgorithm.SHA512 : null
+            );
+            keys.Add(signingKey);
+        }
+
+        return keys;
+    }
+
     /// <summary>
     /// Retrieves a signing key by its Key ID (kid).
     /// If kid is null, retrieves the active encryption key.
@@ -39,7 +85,7 @@ public class SecurityService(
             // We don't have an active key for this usage type, we need to make one.
             key = await GenerateKey(
                 usage,
-                SecurityKey.SecurityKeyType.RSA,
+                SecurityKey.SecurityKeyType.ECDSA,
                 usage == SecurityKey.SecurityKeyUsage.Sign ? SecurityKey.SecurityKeyHashAlgorithm.SHA512 : null
             );
         }
@@ -136,6 +182,16 @@ public class SecurityService(
         };
     }
 
+    public SigningCredentials GetSigningCredentials(SecurityKey key)
+    {
+        var secKey = GetSecurityKey(key);
+        var signingCreds = new SigningCredentials(secKey, GetSecurityAlgorithms(key))
+        {
+            CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
+        };
+        return signingCreds;
+    }
+
     public JsonWebKey GetJsonWebKey(SecurityKey key)
     {
         var securityKey = GetSecurityKey(key);
@@ -146,6 +202,7 @@ public class SecurityService(
             _ => throw new NotSupportedException($"Unsupported key type: {key.KeyType}")
         };
         outKey.Kid = key.KeyId;
+        outKey.Alg = GetSecurityAlgorithms(key);
         outKey.Use = key.Usage switch {
             SecurityKey.SecurityKeyUsage.Sign => "sig",
             SecurityKey.SecurityKeyUsage.Encrypt => "enc",
@@ -176,6 +233,20 @@ public class SecurityService(
             N = key.N
         };
         return outKey;
+    }
+
+    private static string GetSecurityAlgorithms(SecurityKey key)
+    {
+        return key.HashAlgorithm switch {
+            SecurityKey.SecurityKeyHashAlgorithm.SHA256 => SecurityAlgorithms.RsaSha256,
+            SecurityKey.SecurityKeyHashAlgorithm.SHA384 => SecurityAlgorithms.RsaSha384,
+            SecurityKey.SecurityKeyHashAlgorithm.SHA512 => SecurityAlgorithms.RsaSha512,
+            _ => key.KeyType switch {
+                SecurityKey.SecurityKeyType.RSA => SecurityAlgorithms.RsaSha256,
+                SecurityKey.SecurityKeyType.ECDSA => SecurityAlgorithms.EcdsaSha512,
+                _ => throw new NotSupportedException($"Unsupported key type: {key.KeyType}")
+            }
+        };
     }
 
     /// <summary>

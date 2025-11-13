@@ -8,7 +8,6 @@ using Den.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Den.Infrastructure.Auth;
 
@@ -112,16 +111,7 @@ public class AuthService(
         var signingKey = await securityService.GetSigningKeyAsync(null)
             ?? throw new InvalidOperationException("no signing key available");
 
-        var creds = new SigningCredentials(
-            securityService.GetSecurityKey(signingKey),
-            signingKey.HashAlgorithm switch
-            {
-                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA256 => SecurityAlgorithms.RsaSha256,
-                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA384 => SecurityAlgorithms.RsaSha384,
-                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA512 => SecurityAlgorithms.RsaSha512,
-                _ => throw new NotSupportedException("unsupported hash algorithm")
-            }
-        );
+        var creds = securityService.GetSigningCredentials(signingKey);
 
         var now = DateTime.UtcNow;
         var accessToken = new JwtSecurityToken(

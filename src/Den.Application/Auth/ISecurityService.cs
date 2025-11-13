@@ -1,5 +1,3 @@
-using Den.Domain.Entities;
-
 using Microsoft.IdentityModel.Tokens;
 
 using MSSecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;
@@ -9,13 +7,15 @@ namespace Den.Application.Auth;
 
 public interface ISecurityService
 {
+    Task<List<SecurityKey>> GetActiveKeysAsync(SecurityKey.SecurityKeyUsage? usage, bool create = true);
     Task<SecurityKey?> GetKeyAsync(SecurityKey.SecurityKeyUsage usage, Guid? kid, bool create = true);
     Task<SecurityKey?> GetSigningKeyAsync(Guid? kid, bool create = true);
     Task<SecurityKey?> GetEncryptionKeyAsync(Guid? kid, bool create = true);
 
-    public MSSecurityKey GetSecurityKey(SecurityKey key);
+    MSSecurityKey GetSecurityKey(SecurityKey key);
+    SigningCredentials GetSigningCredentials(SecurityKey key);
 
-    public JsonWebKey GetJsonWebKey(SecurityKey key);
-    public JsonWebKey GetPublicJsonWebKey(SecurityKey dbKey);
-    public JsonWebKey GetPublicJsonWebKey(JsonWebKey key);
+    JsonWebKey GetJsonWebKey(SecurityKey key);
+    JsonWebKey GetPublicJsonWebKey(SecurityKey dbKey);
+    JsonWebKey GetPublicJsonWebKey(JsonWebKey key);
 }

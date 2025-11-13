@@ -24,6 +24,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "den";
         var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "den";
 
+        if (builder.Environment.IsDevelopment()) options.RequireHttpsMetadata = false;
+        options.Authority = "http://auth-api/.well-known/jwks.json";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -32,7 +34,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
         };
     });
 
@@ -53,12 +54,8 @@ app.MapDefaultEndpoints();
 
 app.MapGet("/.well-known/jwks.json", async (ISecurityService securityService) =>
 {
-    var keys = new List<Den.Domain.Entities.SecurityKey?> {
-        await securityService.GetEncryptionKeyAsync(null),
-        await securityService.GetEncryptionKeyAsync(null)
-    };
-
-    var jwks = keys.Select(k => k is null ? null : securityService.GetPublicJsonWebKey(k));
+    var keys = await securityService.GetActiveKeysAsync(null, create: true);
+    var jwks = keys.Select(k => securityService.GetPublicJsonWebKey(k));
     return Results.Json(new { Keys = jwks });
 });
 
