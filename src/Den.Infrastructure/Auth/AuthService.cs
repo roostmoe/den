@@ -5,13 +5,18 @@ using System.Text;
 using Den.Application.Auth;
 using Den.Domain.Entities;
 using Den.Infrastructure.Persistence;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Den.Infrastructure.Auth;
 
-public class AuthService(AuthContext context, IConfiguration config) : IAuthService
+public class AuthService(
+    AuthContext context,
+    ISecurityService securityService,
+    IConfiguration config
+) : IAuthService
 {
     public async Task<AuthResponse> SignupAsync(SignupRequest request)
     {
@@ -71,7 +76,7 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
             return null;
         }
 
-        var accessToken = GenerateAccessToken(session.User);
+        var accessToken = await GenerateAccessToken(session.User);
         return new RefreshResponse(accessToken);
     }
 
@@ -99,17 +104,26 @@ public class AuthService(AuthContext context, IConfiguration config) : IAuthServ
         context.Sessions.Add(session);
         await context.SaveChangesAsync();
 
-        return (GenerateAccessToken(user), refreshToken, session);
+        return (await GenerateAccessToken(user), refreshToken, session);
     }
 
-    private string GenerateAccessToken(User user)
+    private async Task<string> GenerateAccessToken(User user)
     {
-        var jwtSecret = config["Jwt:Secret"] ?? throw new InvalidOperationException("jwt secret not configured");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var signingKey = await securityService.GetSigningKeyAsync(null)
+            ?? throw new InvalidOperationException("no signing key available");
+
+        var creds = new SigningCredentials(
+            securityService.GetSecurityKey(signingKey),
+            signingKey.HashAlgorithm switch
+            {
+                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA256 => SecurityAlgorithms.RsaSha256,
+                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA384 => SecurityAlgorithms.RsaSha384,
+                Domain.Entities.SecurityKey.SecurityKeyHashAlgorithm.SHA512 => SecurityAlgorithms.RsaSha512,
+                _ => throw new NotSupportedException("unsupported hash algorithm")
+            }
+        );
 
         var now = DateTime.UtcNow;
-
         var accessToken = new JwtSecurityToken(
             issuer: config["jwt:Issuer"] ?? "den",
             audience: config["jwt:Audience"] ?? "den",

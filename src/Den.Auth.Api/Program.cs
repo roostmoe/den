@@ -1,11 +1,10 @@
 using System.Text;
 using Den.Application.Auth;
-using System.IdentityModel.Tokens.Jwt;
 using Den.Auth.Api.Settings;
-using Den.Domain.Entities;
 using Den.Infrastructure.Auth;
 using Den.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +13,9 @@ builder.AddServiceDefaults();
 
 builder.AddNpgsqlDbContext<AuthContext>(connectionName: "postgresdb");
 
+builder.Services.AddDataProtection().SetApplicationName("den-auth");
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -50,33 +51,14 @@ app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/.well-known/jwks.json", () =>
+app.MapGet("/.well-known/jwks.json", async (ISecurityService securityService) =>
 {
-    var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
-        ?? throw new InvalidOperationException("Jwt not configured");
+    var keys = new List<Den.Domain.Entities.SecurityKey?> {
+        await securityService.GetEncryptionKeyAsync(null),
+        await securityService.GetEncryptionKeyAsync(null)
+    };
 
-    var jwks = jwtOptions.Keys.Select(k => 
-    {
-        var jwk = k.GetJwk();
-        var publicJwk = new JsonWebKey
-        {
-            Kty = jwk.Kty,
-            Kid = jwk.Kid,
-            Use = jwk.Use,
-            Alg = jwk.Alg,
-            
-            // EC params
-            Crv = jwk.Crv,
-            X = jwk.X,
-            Y = jwk.Y,
-            
-            // RSA params
-            N = jwk.N,
-            E = jwk.E
-        };
-        return publicJwk;
-    });
-
+    var jwks = keys.Select(k => k is null ? null : securityService.GetPublicJsonWebKey(k));
     return Results.Json(new { Keys = jwks });
 });
 

@@ -1,8 +1,8 @@
-set quiet := true
+# set quiet := true
 
 apphost := justfile_directory() / "src" / "Den.AppHost"
 infra := justfile_directory() / "src" / "Den.Infrastructure"
-migrations := justfile_directory() / "src" / "Den.MigrationsService"
+migrations := justfile_directory() / "src" / "Den.MigrationService"
 
 run *args:
   dotnet run --project {{ apphost }} {{ args }}
@@ -10,5 +10,5 @@ run *args:
 makemigrations name:
   dotnet ef migrations add {{ name }} \
     --project={{ infra }} \
-    --output={{ infra / "Migrations" }} \
+    --output-dir={{ infra / "Migrations" }} \
     --startup-project={{ migrations }}
