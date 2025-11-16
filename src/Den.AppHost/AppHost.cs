@@ -23,16 +23,22 @@ var reminders = builder.AddProject<Projects.Den_Reminders_Api>("reminders")
     .WithReference(migrations)
     .WaitForCompletion(migrations);
 
+var webClient = builder.AddViteApp("client-web", "../Den.Client.Web")
+    .WithBun()
+    .WithIconName("globe")
+    .WithExternalHttpEndpoints();
+
 var gateway = builder.AddYarp("gateway")
     .WithHostPort(builder.Configuration.GetValue<int>("Port"))
     .WithConfiguration(yarp =>
     {
+        yarp.AddRoute(webClient);
         yarp.AddRoute("/.well-known/jwks.json", auth);
-        yarp.AddRoute("/auth/{**catch-all}", auth)
-            .WithTransformPathRemovePrefix("/auth");
+        yarp.AddRoute("/api/auth/{**catch-all}", auth)
+            .WithTransformPathRemovePrefix("/api/auth");
 
-        yarp.AddRoute("/reminders/{**catch-all}", reminders)
-            .WithTransformPathRemovePrefix("/auth");
+        yarp.AddRoute("/api/reminders/{**catch-all}", reminders)
+            .WithTransformPathRemovePrefix("/api/auth");
     });
 
 builder.Build().Run();

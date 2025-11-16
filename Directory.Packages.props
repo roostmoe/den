@@ -9,9 +9,11 @@
   <ItemGroup>
     <!-- Aspire & ASP.NET -->
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="$(AspireVersion)" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.0.0" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="$(AspireVersion)" />
     <PackageVersion Include="Aspire.Hosting.Yarp" Version="$(AspireVersion)" />
     <PackageVersion Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Bun" Version="9.9.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.9" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Analyzers" Version="9.0.9" />
