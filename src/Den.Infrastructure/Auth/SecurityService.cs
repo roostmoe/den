@@ -6,7 +6,6 @@ using Den.Infrastructure.Persistence;
 
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 using MSSecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;

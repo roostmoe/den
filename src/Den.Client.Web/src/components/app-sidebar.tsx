@@ -1,35 +1,112 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import { Link } from "@tanstack/react-router";
-import { Home, HomeIcon, type LucideIcon } from "lucide-react";
+import { t } from "i18next";
+import { CalendarIcon, CirclePoundSterlingIcon, Home, HomeIcon, LightbulbIcon, ShoppingBasketIcon, UtensilsIcon, type LucideIcon } from "lucide-react";
 
 type MenuItem = {
   type: 'group';
   title: string;
   children: MenuItem[];
 } | {
+  type: 'submenu';
+  title: string;
+  icon?: LucideIcon;
+  defaultOpen?: boolean;
+  children: MenuItem[];
+} | {
   type: 'link';
   title: string;
   url: string;
-  icon: LucideIcon;
+  badge?: string | number;
+  icon?: LucideIcon;
 };
 
 const items = [
   {
     type: 'group',
-    title: 'Application',
+    title: t('menu.home.title'),
     children: [
       {
         type: 'link',
-        title: 'Home',
+        title: t('menu.home.dashboard'),
         url: '#',
         icon: Home
+      }
+    ],
+  },
+
+  {
+    type: 'group',
+    title: t('menu.organisation.title'),
+    children: [
+      {
+        type: 'link',
+        title: t('menu.organisation.groceries'),
+        url: '#',
+        icon: ShoppingBasketIcon,
+        badge: 15,
       },
       {
         type: 'link',
-        title: 'GitHub',
-        url: 'https://github.com/roostmoe/den',
-        icon: Home
-      }
+        title: t('menu.organisation.calendar'),
+        url: '#',
+        icon: CalendarIcon,
+        badge: 3,
+      },
+      {
+        type: 'link',
+        title: t('menu.organisation.reminders'),
+        url: '#',
+        icon: LightbulbIcon,
+        badge: 10,
+      },
+      {
+        type: 'link',
+        title: t('menu.organisation.recipes'),
+        url: '#',
+        icon: UtensilsIcon,
+        badge: 56
+      },
+    ],
+  },
+
+  {
+    type: 'group',
+    title: t('menu.budgeting.title'),
+    children: [
+      {
+        type: 'submenu',
+        title: t('menu.budgeting.budgets'),
+        icon: CirclePoundSterlingIcon,
+        children: [
+          {
+            type: 'link',
+            title: 'Household',
+            url: '#',
+          },
+          {
+            type: 'link',
+            title: 'Grocery',
+            url: '#',
+          },
+          {
+            type: 'link',
+            title: 'Bills & Services',
+            url: '#',
+          },
+          {
+            type: 'link',
+            title: 'Disposable Income',
+            url: '#',
+          },
+          {
+            type: 'link',
+            title: t('menu.budgeting.allBudgets'),
+            url: '#',
+          },
+        ]
+      },
     ],
   }
 ] as MenuItem[];
@@ -60,7 +137,7 @@ export const AppSidebar = () => {
   );
 };
 
-export const SidebarIterator = ({ itemList }: { itemList: typeof items }) => {
+export const SidebarIterator = ({ parent, itemList }: { parent?: MenuItem, itemList: typeof items }) => {
   return itemList.map((item) => {
     switch (item.type) {
       case 'group':
@@ -69,22 +146,47 @@ export const SidebarIterator = ({ itemList }: { itemList: typeof items }) => {
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarIterator itemList={item.children} />
+                <SidebarIterator parent={item} itemList={item.children} />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         );
 
-      case 'link':
+      case 'submenu':
         return (
-          <SidebarMenuItem key={item.title}>
+          <Collapsible key={item.title} defaultOpen={item.defaultOpen == null ? false : item.defaultOpen}>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton>
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  <SidebarIterator parent={item} itemList={item.children} />
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        );
+
+      case 'link':
+        let MenuItemComponent = SidebarMenuItem;
+        if (parent && parent.type == 'submenu') {
+          MenuItemComponent = SidebarMenuSubItem;
+        }
+
+        return (
+          <MenuItemComponent key={item.title}>
             <SidebarMenuButton asChild>
               <Link {...item.url.startsWith('http') ? { href: item.url } : { to: item.url }}>
-                <item.icon />
+                {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+            {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+          </MenuItemComponent>
         );
 
       default:

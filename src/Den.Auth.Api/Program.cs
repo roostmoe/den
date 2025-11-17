@@ -1,6 +1,4 @@
-using System.Text;
 using Den.Application.Auth;
-using Den.Auth.Api.Settings;
 using Den.Infrastructure.Auth;
 using Den.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -25,7 +23,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "den";
 
         if (builder.Environment.IsDevelopment()) options.RequireHttpsMetadata = false;
-        options.Authority = "http://auth-api/.well-known/jwks.json";
+        options.Authority = "/.well-known/jwks.json";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ListIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { BudgetCards } from '@/components/views/dashboard/budget-cards';
+import { SummaryCards } from '@/components/views/dashboard/summary-cards';
 
 export const Route = createFileRoute('/(app)/_home/')({
   component: () => {
@@ -27,16 +28,17 @@ export const Route = createFileRoute('/(app)/_home/')({
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <SummaryCards />
+          <BudgetCards />
+          <Separator />
+
+          <div className="grid lg:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <div className="grid grid-cols-[auto_auto]">
-                  <ListIcon />
-                  <CardTitle> Groceries</CardTitle>
-                </div>
+                <CardTitle>Shopping list</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-3xl font-bold">14</span>
+                Table here
               </CardContent>
             </Card>
 
@@ -45,29 +47,28 @@ export const Route = createFileRoute('/(app)/_home/')({
                 <CardTitle>Reminders</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-3xl font-bold">10</span>
+                Table here
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Calendar Events</CardTitle>
+                <CardTitle>Calendar</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-3xl font-bold">3 today</span>
+                Table here
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Notes</CardTitle>
+                <CardTitle>Upcoming movies</CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-3xl font-bold">32</span>
+                Table here
               </CardContent>
             </Card>
           </div>
-          Home page
         </div>
       </>
     );

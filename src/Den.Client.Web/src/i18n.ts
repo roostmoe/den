@@ -11,6 +11,42 @@ export const resources = {
       // Dashboard
       dashboard: {
         title: 'Dashboard',
+
+        groceriesCountTitle: 'Groceries',
+        remindersCountTitle: 'Reminders',
+
+        calendarEventsTitle: 'Events',
+        calendarEventsCountSubtext: 'event(s) today',
+
+        watchlistCountTitle: 'Watchlist',
+        watchlistCountSubtext: 'in the next 30 days',
+      },
+
+      menu: {
+        home: {
+          title: 'Home',
+          dashboard: 'Dashboard',
+        },
+        organisation: {
+          title: 'Organisation',
+          groceries: 'Groceries',
+          calendar: 'Calendar',
+          reminders: 'Reminders',
+          recipes: 'Recipes',
+        },
+        budgeting: {
+          title: 'Budgeting',
+          budgets: 'Budgets',
+          allBudgets: 'All Budgets',
+        },
+        admin: {
+          title: 'Admin',
+          settings: 'Configuration',
+        },
+        userSettings: {
+          title: 'Settings',
+          doLogOut: 'Log out',
+        },
       },
 
       // Login Form
@@ -44,7 +80,9 @@ export const resources = {
         },
       },
 
-      // Registration Form
+      misc: {
+        doViewMore: 'View more',
+      },
     },
   },
 };
