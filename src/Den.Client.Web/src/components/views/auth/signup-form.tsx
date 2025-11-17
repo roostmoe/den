@@ -25,6 +25,7 @@ const formSchema = z
 
 export const SignupForm = () => {
   const { t } = useTranslation();
+
   const form = useForm({
     defaultValues: {
       username: '',
