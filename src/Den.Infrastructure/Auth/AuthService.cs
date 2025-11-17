@@ -7,16 +7,17 @@ using Den.Domain.Entities;
 using Den.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Den.Infrastructure.Auth;
 
 public class AuthService(
     AuthContext context,
-    ISecurityService securityService,
-    IConfiguration config
+    IOptions<JwtSettings> jwtOptions
 ) : IAuthService
 {
+    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
     public async Task<AuthResponse> SignupAsync(SignupRequest request)
     {
         if (await context.Users.AnyAsync(u => u.Email == request.Email))
@@ -108,15 +109,13 @@ public class AuthService(
 
     private async Task<string> GenerateAccessToken(User user)
     {
-        var signingKey = await securityService.GetSigningKeyAsync(null)
-            ?? throw new InvalidOperationException("no signing key available");
-
-        var creds = securityService.GetSigningCredentials(signingKey);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var now = DateTime.UtcNow;
         var accessToken = new JwtSecurityToken(
-            issuer: config["jwt:Issuer"] ?? "den",
-            audience: config["jwt:Audience"] ?? "den",
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: [
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

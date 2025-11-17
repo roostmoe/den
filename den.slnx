@@ -2,11 +2,12 @@
   <Folder Name="/src/">
     <Project Path="src/Den.AppHost/Den.AppHost.csproj" />
     <Project Path="src/Den.ServiceDefaults/Den.ServiceDefaults.csproj" />
+
     <Project Path="src/Den.Domain/Den.Domain.csproj" />
     <Project Path="src/Den.Application/Den.Application.csproj" />
     <Project Path="src/Den.Infrastructure/Den.Infrastructure.csproj" />
-    <Project Path="src/Den.Auth.Api/Den.Auth.Api.csproj" />
-    <Project Path="src/Den.Reminders.Api/Den.Reminders.Api.csproj" />
+
+    <Project Path="src/Den.Api/Den.Api.csproj" />
     <Project Path="src/Den.MigrationService/Den.MigrationService.csproj" />
   </Folder>
 </Solution>

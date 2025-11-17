@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Den.Auth.Api.Controllers;
+namespace Den.Api.Controllers;
 
 [ApiController]
-[Route("v1")]
+[Route("v1/auth")]
 public class AuthController(
     IAuthService authService,
     AuthContext context,

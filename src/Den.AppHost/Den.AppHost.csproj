@@ -18,8 +18,7 @@
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Bun" />
 
     <ProjectReference Include="../Den.MigrationService/Den.MigrationService.csproj" />
-    <ProjectReference Include="../Den.Auth.Api/Den.Auth.Api.csproj" />
-    <ProjectReference Include="../Den.Reminders.Api/Den.Reminders.Api.csproj" />
+    <ProjectReference Include="../Den.Api/Den.Api.csproj" />
   </ItemGroup>
 
 </Project>

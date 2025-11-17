@@ -20,13 +20,15 @@ public static class Extensions
     private const string HealthEndpointPath = "/healthz";
     private const string AlivenessEndpointPath = "/livez";
 
-    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder, bool isApi = true) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
 
         builder.Services.AddServiceDiscovery();
+
+        if (isApi) builder.Services.AddOpenApi();
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
@@ -38,9 +40,7 @@ public static class Extensions
         });
 
         builder.Services.Configure<ServiceDiscoveryOptions>(options =>
-        {
-            options.AllowedSchemes = ["https"];
-        });
+            options.AllowedSchemes = ["https"]);
 
         return builder;
     }
@@ -55,13 +55,11 @@ public static class Extensions
 
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
-            {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
-            })
+                    .AddRuntimeInstrumentation()
+            )
             .WithTracing(tracing =>
-            {
                 tracing.AddSource(builder.Environment.ApplicationName)
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
@@ -71,8 +69,8 @@ public static class Extensions
                     )
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
-            });
+                    .AddHttpClientInstrumentation()
+            );
 
         builder.AddOpenTelemetryExporters();
 
@@ -106,6 +104,8 @@ public static class Extensions
         // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())
         {
+            app.MapOpenApi();
+
             // All health checks must pass for app to be considered ready to accept traffic after starting
             app.MapHealthChecks(HealthEndpointPath);
 

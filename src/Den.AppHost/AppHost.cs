@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("postgres")
+    .WithHostPort(5432)
     .WithDataVolume(isReadOnly: false);
 
 var postgresDb = postgres.AddDatabase("postgresdb");
@@ -13,12 +14,7 @@ var migrations = builder.AddProject<Projects.Den_MigrationService>("migrations")
     .WithReference(postgresDb)
     .WaitFor(postgresDb);
 
-var auth = builder.AddProject<Projects.Den_Auth_Api>("auth")
-    .WithReference(postgresDb)
-    .WithReference(migrations)
-    .WaitForCompletion(migrations);
-
-var reminders = builder.AddProject<Projects.Den_Reminders_Api>("reminders")
+var api = builder.AddProject<Projects.Den_Api>("api")
     .WithReference(postgresDb)
     .WithReference(migrations)
     .WaitForCompletion(migrations);
@@ -33,12 +29,8 @@ var gateway = builder.AddYarp("gateway")
     .WithConfiguration(yarp =>
     {
         yarp.AddRoute(webClient);
-        yarp.AddRoute("/.well-known/jwks.json", auth);
-        yarp.AddRoute("/api/auth/{**catch-all}", auth)
-            .WithTransformPathRemovePrefix("/api/auth");
-
-        yarp.AddRoute("/api/reminders/{**catch-all}", reminders)
-            .WithTransformPathRemovePrefix("/api/auth");
+        yarp.AddRoute("/api/{**catch-all}", api)
+            .WithTransformPathRemovePrefix("/api");
     });
 
 builder.Build().Run();
