@@ -1,7 +1,18 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
+
+const authSearchSchema = z.object({
+  redirect: z.string().optional(),
+});
 
 export const Route = createFileRoute('/(auth)/_auth')({
+  validateSearch: authSearchSchema,
+  beforeLoad: ({ context, search }) => {
+    if (context.auth.isAuthenticated) {
+      throw redirect({ to: search.redirect || '/' });
+    }
+  },
   component: RouteComponent,
 })
 
