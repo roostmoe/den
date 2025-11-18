@@ -19,22 +19,10 @@ export const useLoginMutation = () => {
   return useMutation({
     ...postV1AuthLoginMutation(),
     onSuccess: (data) => {
-      console.log('[login] mutation success, raw data:', data);
-      console.log('[login] checking tokens:', { 
-        hasAccessToken: !!data?.accessToken, 
-        hasRefreshToken: !!data?.refreshToken,
-        dataKeys: Object.keys(data || {})
+      login({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
       });
-      
-      if (data?.accessToken && data?.refreshToken) {
-        console.log('[login] calling login() with tokens');
-        login({
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-        });
-      } else {
-        console.error('[login] missing tokens in response!', data);
-      }
     },
   });
 }

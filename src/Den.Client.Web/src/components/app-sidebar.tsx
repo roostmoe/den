@@ -115,8 +115,7 @@ const items = [
 ] as MenuItem[];
 
 export const AppSidebar = () => {
-  const { data, isLoading, error } = useMeQuery();
-  console.log(data);
+  const { data, isLoading } = useMeQuery();
 
   return (
     <Sidebar>

@@ -29,16 +29,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     if (tokens) {
-      console.log('[auth] setting tokens in localStorage and client config:', { 
-        hasAccessToken: !!tokens.accessToken, 
-        hasRefreshToken: !!tokens.refreshToken,
-        accessTokenPreview: tokens.accessToken.substring(0, 20) + '...'
-      });
       localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
       client.setConfig({ auth: tokens.accessToken });
     } else {
-      console.log('[auth] clearing tokens from localStorage and client config');
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       client.setConfig({ auth: undefined });
@@ -46,7 +40,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, [tokens]);
 
   const login = useCallback((newTokens: AuthTokens) => {
-    console.log('[auth] login() called with:', newTokens);
     setTokens(newTokens);
   }, []);
 
@@ -59,28 +52,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (!currentRefreshToken) return;
     
     try {
-      console.log('[refresh] calling refresh endpoint with token');
       const { data } = await postV1AuthRefresh({
         body: { refreshToken: currentRefreshToken },
       });
 
-      console.log('[refresh] received response:', data);
-      console.log('[refresh] checking tokens:', { 
-        hasAccessToken: !!data?.accessToken,
-        dataKeys: Object.keys(data || {})
+      setTokens({
+        accessToken: data?.accessToken!!,
+        refreshToken: currentRefreshToken,
       });
-
-      if (data?.accessToken) {
-        console.log('[refresh] updating access token in state, keeping existing refresh token');
-        setTokens({
-          accessToken: data.accessToken,
-          refreshToken: currentRefreshToken,
-        });
-      } else {
-        console.error('[refresh] missing access token in response!', data);
-      }
     } catch (err) {
-      console.error('[refresh] refresh failed:', err);
       // Refresh failed, log out user.
       logout();
     }
