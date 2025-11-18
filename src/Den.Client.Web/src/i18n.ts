@@ -42,6 +42,7 @@ export const resources = {
         admin: {
           title: 'Admin',
           settings: 'Configuration',
+          users: 'Users',
         },
         userSettings: {
           title: 'Settings',

@@ -1,11 +1,12 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
-import { useMeQuery } from "@/lib/state/queries/auth";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Link } from "@tanstack/react-router";
-import { t } from "i18next";
-import { CalendarIcon, CirclePoundSterlingIcon, Home, HomeIcon, LightbulbIcon, ShoppingBasketIcon, User2Icon, UtensilsIcon, type LucideIcon } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CalendarIcon, ChevronUpIcon, CirclePoundSterlingIcon, CogIcon, Home, HomeIcon, LightbulbIcon, ShoppingBasketIcon, User2Icon, UsersIcon, UtensilsIcon, type LucideIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger,  DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMeQuery } from "@/lib/state/queries/auth";
+import { t } from "i18next";
+import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/lib/state/auth";
 
 type MenuItem = {
   type: 'group';
@@ -111,10 +112,30 @@ const items = [
         ]
       },
     ],
-  }
+  },
+
+  {
+    type: 'group',
+    title: t('menu.admin.title'),
+    children: [
+      {
+        type: 'link',
+        title: t('menu.admin.settings'),
+        url: '#',
+        icon: CogIcon,
+      },
+      {
+        type: 'link',
+        title: t('menu.admin.users'),
+        url: '#',
+        icon: UsersIcon,
+      },
+    ],
+  },
 ] as MenuItem[];
 
 export const AppSidebar = () => {
+  const { logout } = useAuth();
   const { data, isLoading } = useMeQuery();
 
   return (
@@ -145,10 +166,27 @@ export const AppSidebar = () => {
               : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuItem>
+                    <SidebarMenuButton>
                       <User2Icon /> {data?.username}
-                    </SidebarMenuItem>
+                      <ChevronUpIcon className="ml-auto" />
+                    </SidebarMenuButton>
                   </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <DropdownMenuItem>
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={e => { e.preventDefault(); logout() }}
+                    >
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
                 </DropdownMenu>
               )
             }
