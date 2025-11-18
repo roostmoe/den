@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Den.Infrastructure.Migrations
 {
-    [DbContext(typeof(AuthContext))]
+    [DbContext(typeof(DenDbContext))]
     [Migration("20251117223956_RemoveSecurityKeys")]
     partial class RemoveSecurityKeys
     {

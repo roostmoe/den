@@ -21,7 +21,7 @@ public class Worker(
         try
         {
             using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AuthContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<DenDbContext>();
             await RunMigrationAsync(dbContext, stoppingToken);
         }
         catch (Exception ex)

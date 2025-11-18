@@ -11,7 +11,7 @@ namespace Den.Api.Controllers;
 [Route("v1/auth")]
 public class AuthController(
     IAuthService authService,
-    AuthContext context,
+    DenDbContext context,
     ILogger<AuthController> logger
 ) : ControllerBase
 {

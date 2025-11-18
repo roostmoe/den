@@ -8,7 +8,9 @@ public class User
   public required string Email { get; set; }
   public required string PasswordHash { get; set; }
   public required UserRole Role { get; set; }
+
   public ICollection<Session> Sessions { get; } = [];
+  public ICollection<Budget> Budgets { get; } = [];
 }
 
 public enum UserRole

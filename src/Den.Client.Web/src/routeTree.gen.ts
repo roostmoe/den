@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as appHomeRouteImport } from './routes/(app)/_home'
 import { Route as appHomeIndexRouteImport } from './routes/(app)/_home.index'
+import { Route as appHomeBudgetsIndexRouteImport } from './routes/(app)/_home/budgets/index'
 import { Route as authAuthAuthSignupRouteImport } from './routes/(auth)/_auth.auth.signup'
 import { Route as authAuthAuthLoginRouteImport } from './routes/(auth)/_auth.auth.login'
+import { Route as appHomeBudgetsCreateRouteImport } from './routes/(app)/_home/budgets/create'
 
 const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/_auth',
@@ -28,6 +30,11 @@ const appHomeIndexRoute = appHomeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => appHomeRoute,
 } as any)
+const appHomeBudgetsIndexRoute = appHomeBudgetsIndexRouteImport.update({
+  id: '/budgets/',
+  path: '/budgets/',
+  getParentRoute: () => appHomeRoute,
+} as any)
 const authAuthAuthSignupRoute = authAuthAuthSignupRouteImport.update({
   id: '/auth/signup',
   path: '/auth/signup',
@@ -38,37 +45,55 @@ const authAuthAuthLoginRoute = authAuthAuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => authAuthRoute,
 } as any)
+const appHomeBudgetsCreateRoute = appHomeBudgetsCreateRouteImport.update({
+  id: '/budgets/create',
+  path: '/budgets/create',
+  getParentRoute: () => appHomeRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof appHomeIndexRoute
+  '/budgets/create': typeof appHomeBudgetsCreateRoute
   '/auth/login': typeof authAuthAuthLoginRoute
   '/auth/signup': typeof authAuthAuthSignupRoute
+  '/budgets': typeof appHomeBudgetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof appHomeIndexRoute
+  '/budgets/create': typeof appHomeBudgetsCreateRoute
   '/auth/login': typeof authAuthAuthLoginRoute
   '/auth/signup': typeof authAuthAuthSignupRoute
+  '/budgets': typeof appHomeBudgetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)/_home': typeof appHomeRouteWithChildren
   '/(auth)/_auth': typeof authAuthRouteWithChildren
   '/(app)/_home/': typeof appHomeIndexRoute
+  '/(app)/_home/budgets/create': typeof appHomeBudgetsCreateRoute
   '/(auth)/_auth/auth/login': typeof authAuthAuthLoginRoute
   '/(auth)/_auth/auth/signup': typeof authAuthAuthSignupRoute
+  '/(app)/_home/budgets/': typeof appHomeBudgetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/login' | '/auth/signup'
+  fullPaths:
+    | '/'
+    | '/budgets/create'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/budgets'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/login' | '/auth/signup'
+  to: '/' | '/budgets/create' | '/auth/login' | '/auth/signup' | '/budgets'
   id:
     | '__root__'
     | '/(app)/_home'
     | '/(auth)/_auth'
     | '/(app)/_home/'
+    | '/(app)/_home/budgets/create'
     | '/(auth)/_auth/auth/login'
     | '/(auth)/_auth/auth/signup'
+    | '/(app)/_home/budgets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -99,6 +124,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appHomeIndexRouteImport
       parentRoute: typeof appHomeRoute
     }
+    '/(app)/_home/budgets/': {
+      id: '/(app)/_home/budgets/'
+      path: '/budgets'
+      fullPath: '/budgets'
+      preLoaderRoute: typeof appHomeBudgetsIndexRouteImport
+      parentRoute: typeof appHomeRoute
+    }
     '/(auth)/_auth/auth/signup': {
       id: '/(auth)/_auth/auth/signup'
       path: '/auth/signup'
@@ -113,15 +145,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthAuthLoginRouteImport
       parentRoute: typeof authAuthRoute
     }
+    '/(app)/_home/budgets/create': {
+      id: '/(app)/_home/budgets/create'
+      path: '/budgets/create'
+      fullPath: '/budgets/create'
+      preLoaderRoute: typeof appHomeBudgetsCreateRouteImport
+      parentRoute: typeof appHomeRoute
+    }
   }
 }
 
 interface appHomeRouteChildren {
   appHomeIndexRoute: typeof appHomeIndexRoute
+  appHomeBudgetsCreateRoute: typeof appHomeBudgetsCreateRoute
+  appHomeBudgetsIndexRoute: typeof appHomeBudgetsIndexRoute
 }
 
 const appHomeRouteChildren: appHomeRouteChildren = {
   appHomeIndexRoute: appHomeIndexRoute,
+  appHomeBudgetsCreateRoute: appHomeBudgetsCreateRoute,
+  appHomeBudgetsIndexRoute: appHomeBudgetsIndexRoute,
 }
 
 const appHomeRouteWithChildren =

@@ -11,6 +11,26 @@ export type AuthResponse = {
     tokenType?: string;
 };
 
+export type BudgetResponse = {
+    id: string;
+    displayName: string;
+    description: string;
+    period: string;
+    total: number;
+    currency: string;
+    ownerId: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type CreateBudgetRequest = {
+    displayName: string;
+    description: string;
+    period: string;
+    total: number;
+    currency: string;
+};
+
 export type LoginRequest = {
     username: string;
     password: string;
@@ -41,6 +61,14 @@ export type SignupRequest = {
     displayName: string;
     email: string;
     password: string;
+};
+
+export type UpdateBudgetRequest = {
+    displayName: string | null;
+    description: string | null;
+    period: string | null;
+    total: number | null;
+    currency: string | null;
 };
 
 export type PostV1AuthSignupData = {
@@ -142,3 +170,162 @@ export type GetV1AuthMeResponses = {
 };
 
 export type GetV1AuthMeResponse = GetV1AuthMeResponses[keyof GetV1AuthMeResponses];
+
+export type GetV1BudgetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/budgets';
+};
+
+export type GetV1BudgetsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type GetV1BudgetsError = GetV1BudgetsErrors[keyof GetV1BudgetsErrors];
+
+export type GetV1BudgetsResponses = {
+    /**
+     * OK
+     */
+    200: Array<BudgetResponse>;
+};
+
+export type GetV1BudgetsResponse = GetV1BudgetsResponses[keyof GetV1BudgetsResponses];
+
+export type PostV1BudgetsData = {
+    body: CreateBudgetRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/budgets';
+};
+
+export type PostV1BudgetsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+};
+
+export type PostV1BudgetsError = PostV1BudgetsErrors[keyof PostV1BudgetsErrors];
+
+export type PostV1BudgetsResponses = {
+    /**
+     * Created
+     */
+    201: BudgetResponse;
+};
+
+export type PostV1BudgetsResponse = PostV1BudgetsResponses[keyof PostV1BudgetsResponses];
+
+export type DeleteV1BudgetsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/budgets/{id}';
+};
+
+export type DeleteV1BudgetsByIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteV1BudgetsByIdError = DeleteV1BudgetsByIdErrors[keyof DeleteV1BudgetsByIdErrors];
+
+export type DeleteV1BudgetsByIdResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteV1BudgetsByIdResponse = DeleteV1BudgetsByIdResponses[keyof DeleteV1BudgetsByIdResponses];
+
+export type GetV1BudgetsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/budgets/{id}';
+};
+
+export type GetV1BudgetsByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetV1BudgetsByIdError = GetV1BudgetsByIdErrors[keyof GetV1BudgetsByIdErrors];
+
+export type GetV1BudgetsByIdResponses = {
+    /**
+     * OK
+     */
+    200: BudgetResponse;
+};
+
+export type GetV1BudgetsByIdResponse = GetV1BudgetsByIdResponses[keyof GetV1BudgetsByIdResponses];
+
+export type PutV1BudgetsByIdData = {
+    body: UpdateBudgetRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/budgets/{id}';
+};
+
+export type PutV1BudgetsByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutV1BudgetsByIdError = PutV1BudgetsByIdErrors[keyof PutV1BudgetsByIdErrors];
+
+export type PutV1BudgetsByIdResponses = {
+    /**
+     * OK
+     */
+    200: BudgetResponse;
+};
+
+export type PutV1BudgetsByIdResponse = PutV1BudgetsByIdResponses[keyof PutV1BudgetsByIdResponses];

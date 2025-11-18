@@ -8,6 +8,10 @@ export const resources = {
       // App Strings
       appTitle: 'Den',
 
+      // Generic Strings
+      optional: '(optional)',
+      submit: 'Submit',
+
       // Dashboard
       dashboard: {
         title: 'Dashboard',
@@ -47,6 +51,35 @@ export const resources = {
         userSettings: {
           title: 'Settings',
           doLogOut: 'Log out',
+        },
+      },
+
+      budgeting: {
+        budgets: {
+          title: 'Budgets',
+          description: 'Manage your budgets to keep track of your finances.',
+        },
+        create: {
+          title: 'Create new budget',
+          description: 'Start tracking your finances against a budget!',
+          doNewBudget: 'New budget',
+
+          form: {
+            displayNameLabel: 'Budget name',
+            descriptionLabel: 'Description',
+            scope: {
+              title: 'Budget scope',
+              subtitle: 'Configure the scope of your budget by setting the amount and in what currency it applies.',
+              totalLabel: 'Total Amount',
+              currencyLabel: 'Currency',
+            },
+          },
+        },
+        currencies: {
+          USD: 'USD ($)',
+          GBP: 'GBP (£)',
+          EUR: 'EUR (€)',
+          COP: 'COP ($)',
         },
       },
 

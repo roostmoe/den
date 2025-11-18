@@ -4,8 +4,8 @@ import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { getV1AuthMe, type Options, postV1AuthLogin, postV1AuthRefresh, postV1AuthSignup } from '../sdk.gen';
-import type { GetV1AuthMeData, GetV1AuthMeError, GetV1AuthMeResponse, PostV1AuthLoginData, PostV1AuthLoginError, PostV1AuthLoginResponse, PostV1AuthRefreshData, PostV1AuthRefreshError, PostV1AuthRefreshResponse, PostV1AuthSignupData, PostV1AuthSignupError, PostV1AuthSignupResponse } from '../types.gen';
+import { deleteV1BudgetsById, getV1AuthMe, getV1Budgets, getV1BudgetsById, type Options, postV1AuthLogin, postV1AuthRefresh, postV1AuthSignup, postV1Budgets, putV1BudgetsById } from '../sdk.gen';
+import type { DeleteV1BudgetsByIdData, DeleteV1BudgetsByIdError, DeleteV1BudgetsByIdResponse, GetV1AuthMeData, GetV1AuthMeError, GetV1AuthMeResponse, GetV1BudgetsByIdData, GetV1BudgetsByIdError, GetV1BudgetsByIdResponse, GetV1BudgetsData, GetV1BudgetsError, GetV1BudgetsResponse, PostV1AuthLoginData, PostV1AuthLoginError, PostV1AuthLoginResponse, PostV1AuthRefreshData, PostV1AuthRefreshError, PostV1AuthRefreshResponse, PostV1AuthSignupData, PostV1AuthSignupError, PostV1AuthSignupResponse, PostV1BudgetsData, PostV1BudgetsError, PostV1BudgetsResponse, PutV1BudgetsByIdData, PutV1BudgetsByIdError, PutV1BudgetsByIdResponse } from '../types.gen';
 
 export const postV1AuthSignupMutation = (options?: Partial<Options<PostV1AuthSignupData>>): UseMutationOptions<PostV1AuthSignupResponse, AxiosError<PostV1AuthSignupError>, Options<PostV1AuthSignupData>> => {
     const mutationOptions: UseMutationOptions<PostV1AuthSignupResponse, AxiosError<PostV1AuthSignupError>, Options<PostV1AuthSignupData>> = {
@@ -98,3 +98,75 @@ export const getV1AuthMeOptions = (options?: Options<GetV1AuthMeData>) => queryO
     },
     queryKey: getV1AuthMeQueryKey(options)
 });
+
+export const getV1BudgetsQueryKey = (options?: Options<GetV1BudgetsData>) => createQueryKey("getV1Budgets", options);
+
+export const getV1BudgetsOptions = (options?: Options<GetV1BudgetsData>) => queryOptions<GetV1BudgetsResponse, AxiosError<GetV1BudgetsError>, GetV1BudgetsResponse, ReturnType<typeof getV1BudgetsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getV1Budgets({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getV1BudgetsQueryKey(options)
+});
+
+export const postV1BudgetsMutation = (options?: Partial<Options<PostV1BudgetsData>>): UseMutationOptions<PostV1BudgetsResponse, AxiosError<PostV1BudgetsError>, Options<PostV1BudgetsData>> => {
+    const mutationOptions: UseMutationOptions<PostV1BudgetsResponse, AxiosError<PostV1BudgetsError>, Options<PostV1BudgetsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postV1Budgets({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const deleteV1BudgetsByIdMutation = (options?: Partial<Options<DeleteV1BudgetsByIdData>>): UseMutationOptions<DeleteV1BudgetsByIdResponse, AxiosError<DeleteV1BudgetsByIdError>, Options<DeleteV1BudgetsByIdData>> => {
+    const mutationOptions: UseMutationOptions<DeleteV1BudgetsByIdResponse, AxiosError<DeleteV1BudgetsByIdError>, Options<DeleteV1BudgetsByIdData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteV1BudgetsById({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getV1BudgetsByIdQueryKey = (options: Options<GetV1BudgetsByIdData>) => createQueryKey("getV1BudgetsById", options);
+
+export const getV1BudgetsByIdOptions = (options: Options<GetV1BudgetsByIdData>) => queryOptions<GetV1BudgetsByIdResponse, AxiosError<GetV1BudgetsByIdError>, GetV1BudgetsByIdResponse, ReturnType<typeof getV1BudgetsByIdQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getV1BudgetsById({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getV1BudgetsByIdQueryKey(options)
+});
+
+export const putV1BudgetsByIdMutation = (options?: Partial<Options<PutV1BudgetsByIdData>>): UseMutationOptions<PutV1BudgetsByIdResponse, AxiosError<PutV1BudgetsByIdError>, Options<PutV1BudgetsByIdData>> => {
+    const mutationOptions: UseMutationOptions<PutV1BudgetsByIdResponse, AxiosError<PutV1BudgetsByIdError>, Options<PutV1BudgetsByIdData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await putV1BudgetsById({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};

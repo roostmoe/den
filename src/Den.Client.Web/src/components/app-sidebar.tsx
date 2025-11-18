@@ -34,7 +34,7 @@ const items = [
       {
         type: 'link',
         title: t('menu.home.dashboard'),
-        url: '#',
+        url: '/',
         icon: Home
       }
     ],
@@ -107,7 +107,7 @@ const items = [
           {
             type: 'link',
             title: t('menu.budgeting.allBudgets'),
-            url: '#',
+            url: '/budgets',
           },
         ]
       },

@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Den.Infrastructure.Migrations
 {
-    [DbContext(typeof(AuthContext))]
+    [DbContext(typeof(DenDbContext))]
     [Migration("20251112211324_Sessions")]
     partial class Sessions
     {

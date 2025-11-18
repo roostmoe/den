@@ -13,7 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Den.Infrastructure.Auth;
 
 public class AuthService(
-    AuthContext context,
+    DenDbContext context,
     IOptions<JwtSettings> jwtOptions
 ) : IAuthService
 {
@@ -119,6 +119,7 @@ public class AuthService(
             claims: [
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
             ],
             expires: now.AddMinutes(5),
             signingCredentials: creds,

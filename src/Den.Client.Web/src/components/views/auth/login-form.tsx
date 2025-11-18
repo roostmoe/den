@@ -3,11 +3,11 @@ import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui/field';
+import { Field, /*FieldDescription,*/ FieldError, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Link } from '@tanstack/react-router';
+/*import { Link } from '@tanstack/react-router';*/
 import { useLoginMutation } from '@/lib/state/queries/auth';
 
 const formSchema = z.object({
@@ -88,13 +88,14 @@ export const LoginForm = () => {
                   tabIndex={2}
                   aria-invalid={isInvalid}
                 />
-                <FieldDescription>
-                  <Link
-                    to="#"
-                  >
-                    {t('login.form.forgotPassword')}
-                  </Link>
-                </FieldDescription>
+                {/* TODO */}
+                {/* <FieldDescription> */}
+                {/*   <Link */}
+                {/*     to="/" */}
+                {/*   > */}
+                {/*     {t('login.form.forgotPassword')} */}
+                {/*   </Link> */}
+                {/* </FieldDescription> */}
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );

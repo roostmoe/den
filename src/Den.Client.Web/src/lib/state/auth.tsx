@@ -7,7 +7,7 @@ type AuthTokens = {
   refreshToken: string;
 };
 
-type AuthContext = {
+export type AuthContext = {
   tokens: AuthTokens | null;
   refresh: () => Promise<void>;
   login: (tokens: AuthTokens) => void;

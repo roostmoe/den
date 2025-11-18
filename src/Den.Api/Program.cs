@@ -1,16 +1,19 @@
+using System.Text;
 using Den.Application.Auth;
+using Den.Application.Budgets;
 using Den.Infrastructure.Auth;
+using Den.Infrastructure.Budgets;
 using Den.Infrastructure.Persistence;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDbContext<AuthContext>(connectionName: "postgresdb");
+builder.AddNpgsqlDbContext<DenDbContext>(connectionName: "postgresdb");
 
 builder.Services.AddDataProtection().SetApplicationName("den-auth");
 
@@ -19,6 +22,9 @@ var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBudgetRequestValidator>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -37,7 +43,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EditorOrHigher", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == System.Security.Claims.ClaimTypes.Role &&
+                (c.Value == "EDITOR" || c.Value == "ADMIN"))));
+});
 
 builder.Services.AddControllers();
 
