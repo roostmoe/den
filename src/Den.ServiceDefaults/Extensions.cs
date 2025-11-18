@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ServiceDiscovery;
+using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -28,7 +30,54 @@ public static class Extensions
 
         builder.Services.AddServiceDiscovery();
 
-        if (isApi) builder.Services.AddOpenApi();
+        if (isApi)
+        {
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Components ??= new();
+                    document.Components.SecuritySchemes ??= new Dictionary<string, OpenApiSecurityScheme>();
+                    document.Components.SecuritySchemes["Bearer"] = new()
+                    {
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        Description = "JWT Authorization header using the Bearer scheme"
+                    };
+                    
+                    return Task.CompletedTask;
+                });
+
+                options.AddOperationTransformer((operation, context, cancellationToken) =>
+                {
+                    var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+                    
+                    var hasAuthorize = metadata.OfType<AuthorizeAttribute>().Any();
+                    var hasAllowAnonymous = metadata.OfType<AllowAnonymousAttribute>().Any();
+
+                    if (hasAuthorize && !hasAllowAnonymous)
+                    {
+                        operation.Security = new List<OpenApiSecurityRequirement>
+                        {
+                            new()
+                            {
+                                [new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "Bearer"
+                                    }
+                                }] = Array.Empty<string>()
+                            }
+                        };
+                    }
+
+                    return Task.CompletedTask;
+                });
+            });
+        }
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {

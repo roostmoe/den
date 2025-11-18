@@ -7,7 +7,8 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen-client": "openapi-ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -27,6 +28,7 @@
     "@tanstack/react-router": "^1.136.8",
     "@tanstack/react-router-devtools": "^1.136.8",
     "@tanstack/router-plugin": "^1.136.8",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -44,6 +46,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@hey-api/client-axios": "^0.9.1",
+    "@hey-api/openapi-ts": "0.87.5",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

@@ -9,18 +9,26 @@ import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { client } from './lib/state/client/client.gen';
+import { AuthProvider } from './lib/state/auth';
 
 const router = createRouter({ routeTree });
-const client = new QueryClient();
+
+client.setConfig({
+  baseURL: `${window.origin}/api`,
+});
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={client}>
-      <ThemeProvider defaultTheme="dark">
-        <RouterProvider router={router} />
-        <TanStackRouterDevtools router={router} />
-        <Toaster />
-      </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="dark">
+          <RouterProvider router={router} />
+          <TanStackRouterDevtools router={router} position="bottom-right" />
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
       <ReactQueryDevtools />
     </QueryClientProvider>
   </StrictMode>,

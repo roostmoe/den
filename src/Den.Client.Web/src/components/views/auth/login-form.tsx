@@ -7,9 +7,8 @@ import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
-import { InvalidAuthException, useLoginMutation } from '@/lib/state/queries/auth/login';
+import { useLoginMutation } from '@/lib/state/queries/auth';
 
 const formSchema = z.object({
   username: z.string().nonempty('Please enter your username.'),
@@ -19,7 +18,7 @@ const formSchema = z.object({
 
 export const LoginForm = () => {
   const { t } = useTranslation();
-  const { mutateAsync } = useLoginMutation();
+  const { mutate } = useLoginMutation();
 
   const form = useForm({
     defaultValues: {
@@ -30,21 +29,13 @@ export const LoginForm = () => {
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: async ({ value, formApi }) => {
-      try {
-        await mutateAsync({ username: value.username, password: value.password });
-      } catch (ex) {
-        if (ex instanceof InvalidAuthException) {
-          formApi.setErrorMap({
-            onChange: {
-              fields: {
-                username: { message: 'Invalid username or password.' },
-                password: { message: '' }
-              }
-            }
-          });
+    onSubmit: async ({ value }) => {
+      mutate({
+        body: {
+          username: value.username,
+          password: value.password,
         }
-      }
+      });
     },
   });
 

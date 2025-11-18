@@ -61,7 +61,7 @@ public class AuthController(
     [HttpGet("me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult> GetMe()
+    public async Task<ActionResult<MeResponse>> GetMe()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
@@ -77,13 +77,12 @@ public class AuthController(
             return Unauthorized(new { error = "user not found" });
         }
 
-        return Ok(new
-        {
-            id = user.Id,
-            username = user.Username,
-            displayName = user.DisplayName,
-            email = user.Email,
-            role = user.Role.ToString()
-        });
+        return Ok(new MeResponse(
+            Id: user.Id.ToString(),
+            Username: user.Username,
+            DisplayName: user.DisplayName,
+            Email: user.Email,
+            Role: user.Role.ToString()
+        ));
     }
 }

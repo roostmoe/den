@@ -1,8 +1,11 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
+import { useMeQuery } from "@/lib/state/queries/auth";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "@tanstack/react-router";
 import { t } from "i18next";
-import { CalendarIcon, CirclePoundSterlingIcon, Home, HomeIcon, LightbulbIcon, ShoppingBasketIcon, UtensilsIcon, type LucideIcon } from "lucide-react";
+import { CalendarIcon, CirclePoundSterlingIcon, Home, HomeIcon, LightbulbIcon, ShoppingBasketIcon, User2Icon, UtensilsIcon, type LucideIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type MenuItem = {
   type: 'group';
@@ -112,6 +115,9 @@ const items = [
 ] as MenuItem[];
 
 export const AppSidebar = () => {
+  const { data, isLoading, error } = useMeQuery();
+  console.log(data);
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -132,7 +138,24 @@ export const AppSidebar = () => {
       <SidebarContent>
         <SidebarIterator itemList={items} />
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            {isLoading && !data
+              ? (<Skeleton />)
+              : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuItem>
+                      <User2Icon /> {data?.username}
+                    </SidebarMenuItem>
+                  </DropdownMenuTrigger>
+                </DropdownMenu>
+              )
+            }
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 };
@@ -142,7 +165,7 @@ export const SidebarIterator = ({ parent, itemList }: { parent?: MenuItem, itemL
     switch (item.type) {
       case 'group':
         return (
-          <SidebarGroup>
+          <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
