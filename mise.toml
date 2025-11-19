@@ -1,0 +1,5 @@
+[tools]
+dotnet = "10.0.100"
+just = "1.43.0"
+"dotnet:dotnet-ef" = "9.0.10"
+"dotnet:Aspire.Cli" = "13.0.0"
