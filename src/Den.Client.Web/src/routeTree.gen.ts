@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as authAuthRouteImport } from './routes/(auth)/_auth'
 import { Route as appHomeRouteImport } from './routes/(app)/_home'
 import { Route as appHomeIndexRouteImport } from './routes/(app)/_home.index'
+import { Route as appHomeCalendarIndexRouteImport } from './routes/(app)/_home/calendar/index'
 import { Route as appHomeBudgetsIndexRouteImport } from './routes/(app)/_home/budgets/index'
 import { Route as authAuthAuthSignupRouteImport } from './routes/(auth)/_auth.auth.signup'
 import { Route as authAuthAuthLoginRouteImport } from './routes/(auth)/_auth.auth.login'
@@ -28,6 +29,11 @@ const appHomeRoute = appHomeRouteImport.update({
 const appHomeIndexRoute = appHomeIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => appHomeRoute,
+} as any)
+const appHomeCalendarIndexRoute = appHomeCalendarIndexRouteImport.update({
+  id: '/calendar/',
+  path: '/calendar/',
   getParentRoute: () => appHomeRoute,
 } as any)
 const appHomeBudgetsIndexRoute = appHomeBudgetsIndexRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof authAuthAuthLoginRoute
   '/auth/signup': typeof authAuthAuthSignupRoute
   '/budgets': typeof appHomeBudgetsIndexRoute
+  '/calendar': typeof appHomeCalendarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof appHomeIndexRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof authAuthAuthLoginRoute
   '/auth/signup': typeof authAuthAuthSignupRoute
   '/budgets': typeof appHomeBudgetsIndexRoute
+  '/calendar': typeof appHomeCalendarIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/(auth)/_auth/auth/login': typeof authAuthAuthLoginRoute
   '/(auth)/_auth/auth/signup': typeof authAuthAuthSignupRoute
   '/(app)/_home/budgets/': typeof appHomeBudgetsIndexRoute
+  '/(app)/_home/calendar/': typeof appHomeCalendarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -83,8 +92,15 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/signup'
     | '/budgets'
+    | '/calendar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/budgets/create' | '/auth/login' | '/auth/signup' | '/budgets'
+  to:
+    | '/'
+    | '/budgets/create'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/budgets'
+    | '/calendar'
   id:
     | '__root__'
     | '/(app)/_home'
@@ -94,6 +110,7 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/auth/login'
     | '/(auth)/_auth/auth/signup'
     | '/(app)/_home/budgets/'
+    | '/(app)/_home/calendar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,6 +139,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof appHomeIndexRouteImport
+      parentRoute: typeof appHomeRoute
+    }
+    '/(app)/_home/calendar/': {
+      id: '/(app)/_home/calendar/'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof appHomeCalendarIndexRouteImport
       parentRoute: typeof appHomeRoute
     }
     '/(app)/_home/budgets/': {
@@ -159,12 +183,14 @@ interface appHomeRouteChildren {
   appHomeIndexRoute: typeof appHomeIndexRoute
   appHomeBudgetsCreateRoute: typeof appHomeBudgetsCreateRoute
   appHomeBudgetsIndexRoute: typeof appHomeBudgetsIndexRoute
+  appHomeCalendarIndexRoute: typeof appHomeCalendarIndexRoute
 }
 
 const appHomeRouteChildren: appHomeRouteChildren = {
   appHomeIndexRoute: appHomeIndexRoute,
   appHomeBudgetsCreateRoute: appHomeBudgetsCreateRoute,
   appHomeBudgetsIndexRoute: appHomeBudgetsIndexRoute,
+  appHomeCalendarIndexRoute: appHomeCalendarIndexRoute,
 }
 
 const appHomeRouteWithChildren =
